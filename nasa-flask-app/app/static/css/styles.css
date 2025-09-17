@@ -1,0 +1,639 @@
+*, *::before, *::after { box-sizing: border-box; }
+* { min-width: 0; }
+html, body { margin: 0; padding: 0; }
+:root { color-scheme: light dark; } /* lets UA render native UI appropriately */
+
+/* 2) Registered custom properties for robustness (typed vars) */
+@property --brand { syntax: '<color>'; inherits: false; initial-value: #0b5fff; }
+@property --accent { syntax: '<color>'; inherits: false; initial-value: #ff7b00; }
+@property --success { syntax: '<color>'; inherits: false; initial-value: #2ea043; }
+@property --warning { syntax: '<color>'; inherits: false; initial-value: #cc6b00; }
+@property --error { syntax: '<color>'; inherits: false; initial-value: #d4193d; }
+
+@property --radius { syntax: '<length>'; inherits: false; initial-value: 0.5rem; }
+@property --shadow-elev { syntax: '<length>'; inherits: false; initial-value: 24px; }
+
+/* 3) Theme tokens (use light-dark() for dual palettes) */
+:root {
+  /* Foreground and background */
+  --bg: light-dark(#ffffff, #0b0f1a);
+  --fg: light-dark(#0b1220, #e6edf3);
+  --fg-muted: light-dark(#334155, #a9b4c2);
+  --surface: light-dark(#f8fafc, #101726);
+  --surface-2: light-dark(#eef2f7, #0e1422);
+  --border: light-dark(#d0d7e2, #263445);
+
+  /* Interactive */
+  --link: light-dark(#0b5fff, #7aa2ff);
+  --link-visited: light-dark(#6b4eff, #b7a6ff);
+
+  /* Spacing scale */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+
+  /* Typography */
+  --font-sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+  --fs-0: clamp(0.875rem, 0.83rem + 0.2vw, 1rem);
+  --fs-1: clamp(1rem, 0.95rem + 0.3vw, 1.125rem);
+  --fs-2: clamp(1.125rem, 1.05rem + 0.45vw, 1.375rem);
+  --fs-3: clamp(1.375rem, 1.2rem + 0.8vw, 1.75rem);
+  --fs-4: clamp(1.75rem, 1.5rem + 1.2vw, 2.25rem);
+}
+
+/* 4) Document */
+html { hanging-punctuation: first last; }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  font-size: var(--fs-1);
+  line-height: 1.6;
+  text-rendering: optimizeLegibility;
+}
+
+/* 5) Links and text */
+a { color: var(--link); text-decoration: underline; text-underline-offset: 2px; }
+a:visited { color: var(--link-visited); }
+
+/* 6) Containers and layout */
+.container { width: min(100% - 2rem, 72rem); margin-inline: auto; }
+.layout { display: grid; gap: var(--space-5); grid-template-columns: 1fr; }
+.sidebar { order: 2; }
+.content { order: 1; }
+
+/* Make the main layout responsive via viewport (layout itself), but use container queries for components */
+@media (min-width: 900px) {
+  .layout { grid-template-columns: 280px 1fr; }
+  .sidebar { order: 1; }
+  .content { order: 2; }
+}
+
+/* 7) Header and nav */
+.site-header {
+  position: sticky; top: 0; z-index: 50;
+  backdrop-filter: saturate(1.2) blur(6px);
+  background: color-mix(in lab, var(--surface) 75%, transparent);
+  border-bottom: 1px solid var(--border);
+}
+.brand { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-4); }
+.site-name { font-size: var(--fs-2); font-weight: 700; color: var(--fg); text-decoration: none; }
+
+/* 8) Breadcrumbs */
+.breadcrumbs { border-block: 1px solid var(--border); background: var(--surface-2); }
+.breadcrumbs ol {
+  margin: 0; padding: var(--space-2) var(--space-4);
+  display: flex; gap: var(--space-2); list-style: none;
+  flex-wrap: wrap;
+}
+.breadcrumbs a { text-decoration: none; }
+.breadcrumbs li+li::before { content: "›"; margin-inline: var(--space-2); color: var(--fg-muted); }
+
+/* 9) Hero */
+.hero {
+  padding: var(--space-6) var(--space-4);
+  background: linear-gradient(180deg, color-mix(in lab, var(--surface), transparent 25%), transparent 85%);
+  border-bottom: 1px solid var(--border);
+}
+.hero .lead { color: var(--fg-muted); max-width: 65ch; }
+
+/* 10) Cards, lists, utilities */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--space-4);
+  box-shadow: 0 1px calc(var(--shadow-elev) * 0.02) color-mix(in srgb, black 10%, transparent);
+}
+.list { margin: 0; padding-left: 1.25rem; }
+
+/* 11) Flash messages (status region) */
+.flash {
+  display: grid; gap: var(--space-2);
+  padding: var(--space-3);
+  margin-block: var(--space-4);
+  background: color-mix(in lab, var(--surface), transparent 25%);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.flash-item.info { border-left: 4px solid var(--brand); }
+.flash-item.success { border-left: 4px solid var(--success); }
+.flash-item.warning { border-left: 4px solid var(--warning); }
+.flash-item.error { border-left: 4px solid var(--error); }
+
+/* 12) Footer */
+.site-footer {
+  margin-top: var(--space-6);
+  padding-block: var(--space-5);
+  border-top: 1px solid var(--border);
+  color: var(--fg-muted);
+}
+.footer-nav ul { list-style: none; display: flex; gap: var(--space-4); padding: 0; margin: var(--space-3) 0 0; }
+
+/* 13) Skip link (WCAG pattern) */
+.skip-link {
+  position: absolute; left: 0.5rem; top: 0.5rem;
+  padding: 0.5rem 0.75rem; border-radius: var(--radius);
+  background: var(--surface); border: 1px solid var(--border);
+  color: var(--fg); text-decoration: none;
+  transform: translateY(-200%); transition: transform 150ms ease;
+}
+.skip-link:focus-visible { transform: translateY(0); outline: 3px solid var(--brand); }
+
+/* Ensure main is focusable target after skip */
+main[tabindex="-1"]:focus { outline: none; }
+
+/* 14) Focus styles */
+:where(a, button, input, select, textarea, summary):focus-visible {
+  outline: 3px solid var(--brand);
+  outline-offset: 2px;
+  border-radius: calc(var(--radius) / 2);
+}
+
+/* 15) Buttons */
+.button, button, [type="submit"] {
+  appearance: none; border: 1px solid var(--border);
+  background: var(--surface); color: var(--fg);
+  padding: 0.5rem 0.875rem; border-radius: var(--radius);
+  cursor: pointer; font: inherit;
+}
+.button.primary, button.primary { background: var(--brand); color: white; border-color: color-mix(in lab, var(--brand), black 15%); }
+.button.primary:hover { filter: brightness(1.05); }
+
+/* 16) Forms */
+input, select, textarea {
+  background: var(--surface);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) - 2px);
+  padding: 0.5rem 0.75rem;
+}
+label { display: block; margin-bottom: var(--space-2); }
+fieldset { border: 1px solid var(--border); border-radius: var(--radius); padding: var(--space-4); }
+
+/* 17) Code and tables */
+code, pre, kbd, samp { font-family: var(--font-mono); }
+pre {
+  background: var(--surface-2); padding: var(--space-4);
+  border: 1px solid var(--border); border-radius: var(--radius);
+  overflow-x: auto;
+}
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 0.625rem 0.75rem; border: 1px solid var(--border); }
+thead th { background: var(--surface-2); }
+
+/* 18) Screen-reader-only utility */
+.sr-only {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0);
+  white-space: nowrap; border: 0;
+}
+
+/* 19) Component-level responsiveness with container queries */
+.cards {
+  display: grid; gap: var(--space-4);
+  grid-template-columns: 1fr;
+  container-type: inline-size; /* establish containment */
+}
+.cards .card { min-height: 100%; }
+
+@container (width > 520px) {
+  .cards { grid-template-columns: repeat(2, 1fr); }
+}
+@container (width > 860px) {
+  .cards { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* 20) Theming with prefers-color-scheme (optional overrides) */
+@media (prefers-color-scheme: dark) {
+  body { /* keep variables doing the heavy lifting */ }
+}
+
+/* 21) Respect prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
+  html { scroll-behavior: auto; }
+  .skip-link { transition: none; }
+}
+
+/* Sections/surfaces */
+.section.surface {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--space-5);
+}
+
+/* Filter form */
+.filters { border: 1px solid var(--border); border-radius: var(--radius); }
+.filters .controls {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  align-items: end;
+}
+.control label { font-weight: 600; margin-bottom: var(--space-2); }
+.control-actions { display: flex; gap: var(--space-3); }
+
+/* Photo grid */
+.grid.photos {
+  margin-top: var(--space-5);
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+}
+
+/* Each figure opts into rendering-skip until needed for perf */
+.photo {
+  content-visibility: auto;
+  contain-intrinsic-size: 240px 180px; /* reserve space to reduce reflow */
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  display: grid;
+  gap: 0;
+}
+
+/* Image area; aspect-ratio helps when width/height aren't available */
+.photo img {
+  width: 100%;
+  height: auto;
+  display: block;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+
+/* Caption */
+.photo figcaption {
+  padding: var(--space-3);
+  font-size: var(--fs-0);
+  color: var(--fg-muted);
+  border-top: 1px solid var(--border);
+}
+
+/* Hover affordance */
+@media (hover: hover) and (pointer: fine) {
+  .photo:hover img { filter: saturate(1.05) contrast(1.02); }
+}
+
+/* Site navigation container */
+.site-nav {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-4);
+}
+
+/* Mobile toggle button */
+.nav-toggle {
+  display: none; /* Hidden on desktop */
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--space-2);
+  z-index: 10;
+}
+
+/* Hamburger icon */
+.hamburger {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  width: 24px;
+}
+
+.hamburger-line {
+  height: 2px;
+  background: var(--fg);
+  border-radius: 2px;
+  transition: all 200ms ease;
+}
+
+/* Animated hamburger states */
+.nav-toggle[aria-expanded="true"] .hamburger-line:nth-child(1) {
+  transform: rotate(45deg) translateY(5px);
+}
+
+.nav-toggle[aria-expanded="true"] .hamburger-line:nth-child(2) {
+  opacity: 0;
+}
+
+.nav-toggle[aria-expanded="true"] .hamburger-line:nth-child(3) {
+  transform: rotate(-45deg) translateY(-5px);
+}
+
+/* Navigation */
+.nav {
+  flex-grow: 1;
+}
+
+.nav-list {
+  display: flex;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  align-items: center;
+}
+
+.nav-link {
+  display: block;
+  padding: var(--space-2) var(--space-3);
+  text-decoration: none;
+  color: var(--fg);
+  border-radius: calc(var(--radius) / 2);
+  transition: background-color 150ms ease;
+}
+
+.nav-link:hover {
+  background-color: color-mix(in lab, var(--surface), transparent 50%);
+}
+
+/* Current page indicator */
+.nav-link[aria-current="page"] {
+  background-color: var(--brand);
+  color: white;
+  font-weight: 600;
+}
+
+/* Mobile responsive behavior */
+@media (max-width: 768px) {
+  .nav-toggle {
+    display: block;
+  }
+
+  /* Mobile nav positioning */
+  .nav {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin: var(--space-2);
+    box-shadow: 0 8px 24px color-mix(in srgb, black 15%, transparent);
+
+    /* Initially hidden */
+    transform: translateY(-8px);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 200ms ease;
+  }
+
+  /* Show when expanded */
+  .nav-toggle[aria-expanded="true"] + .nav {
+    transform: translateY(0);
+    opacity: 1;
+    visibility: visible;
+  }
+
+  /* Vertical mobile layout */
+  .nav-list {
+    flex-direction: column;
+    gap: 0;
+    padding: var(--space-2);
+  }
+
+  .nav-item {
+    width: 100%;
+  }
+
+  .nav-link {
+    padding: var(--space-3) var(--space-4);
+    border-radius: calc(var(--radius) / 2);
+  }
+
+  /* Current page styling in mobile */
+  .nav-link[aria-current="page"] {
+    background-color: color-mix(in lab, var(--brand), transparent 85%);
+    color: var(--brand);
+    border-left: 3px solid var(--brand);
+  }
+}
+
+/* Reduce motion for hamburger animation */
+@media (prefers-reduced-motion: reduce) {
+  .hamburger-line {
+    transition: none;
+  }
+
+  .nav {
+    transition: none;
+  }
+}
+
+/* Home: featured APOD preview */
+.apod-preview {
+  display: grid;
+  gap: var(--space-3);
+  overflow: hidden;
+}
+.apod-preview img {
+  width: 100%;
+  height: auto;
+  display: block;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}
+.apod-preview figcaption {
+  font-size: var(--fs-0);
+  color: var(--fg-muted);
+  border-top: 1px solid var(--border);
+  padding-top: var(--space-3);
+}
+
+/* Home: feature cards grid */
+.features {
+  margin-top: var(--space-5);
+}
+.features .card h2 {
+  margin-top: 0;
+}
+.features .button {
+  text-decoration: none; /* anchors styled as buttons for navigation */
+}
+/* Gallery layout */
+.gallery {
+  margin-top: var(--space-5);
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+}
+
+/* Tile wrapper with performance hints */
+.tile {
+  content-visibility: auto;
+  contain-intrinsic-size: 240px 180px; /* reserves space to reduce CLS */
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+/* Images: intrinsic sizing + fallback ratio */
+.tile img {
+  width: 100%;
+  height: auto;
+  display: block;
+  aspect-ratio: 16 / 9; /* used when width/height missing */
+  object-fit: cover;
+}
+
+/* Videos: responsive iframe */
+.tile iframe {
+  width: 100%;
+  height: auto;
+  display: block;
+  aspect-ratio: 16 / 9;
+  border: 0;
+}
+
+/* Caption */
+.tile figcaption {
+  padding: var(--space-3);
+  font-size: var(--fs-0);
+  color: var(--fg-muted);
+  border-top: 1px solid var(--border);
+}
+
+/* Filters (can reuse rover form styles) */
+.filters .controls {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  align-items: end;
+}
+.control label { font-weight: 600; margin-bottom: var(--space-2); }
+.control-actions { display: flex; gap: var(--space-3); }
+
+/* APOD article */
+.apod-article {
+  margin-top: var(--space-5);
+  display: grid;
+  gap: var(--space-4);
+}
+
+/* Media wrapper */
+.apod-media {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+/* Images */
+.apod-image img {
+  width: 100%;
+  height: auto;
+  display: block;
+  aspect-ratio: 16 / 9; /* fallback when no width/height */
+  object-fit: cover;
+}
+
+/* Videos */
+.apod-video iframe {
+  width: 100%;
+  height: auto;
+  display: block;
+  aspect-ratio: 16 / 9;
+  border: 0;
+}
+
+/* Caption and text */
+.apod-media figcaption {
+  padding: var(--space-3);
+  font-size: var(--fs-0);
+  color: var(--fg-muted);
+  border-top: 1px solid var(--border);
+}
+
+.apod-explanation {
+  font-size: var(--fs-1);
+  line-height: 1.7;
+}
+/* Skeleton system — add at end of CSS */
+
+/* Base shimmer */
+@keyframes skeleton-shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* Apply to any container while loading */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: color-mix(in lab, var(--surface), transparent 25%);
+  border-color: var(--border);
+}
+
+/* Shimmer overlay */
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in lab, white, transparent 70%) 45%,
+    color-mix(in lab, white, transparent 50%) 50%,
+    color-mix(in lab, white, transparent 70%) 55%,
+    transparent 100%
+  );
+  transform: translateX(-100%);
+  animation: skeleton-shimmer 1400ms ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* Text lines */
+.skeleton-line {
+  height: 0.9rem;
+  border-radius: 999px;
+  background: color-mix(in lab, var(--surface-2), transparent 25%);
+}
+.skeleton-line.thin { height: 0.7rem; }
+.skeleton-line.wide { height: 1.1rem; }
+.skeleton-gap { height: var(--space-2); }
+
+/* Avatar / circle */
+.skeleton-avatar {
+  width: 3rem; height: 3rem; border-radius: 999px;
+  background: color-mix(in lab, var(--surface-2), transparent 25%);
+}
+
+/* Rectangular media placeholders with safe ratios */
+.skeleton-rect,
+.skeleton-16x9,
+.skeleton-4x3,
+.skeleton-1x1 {
+  width: 100%;
+  border-radius: var(--radius);
+  background: color-mix(in lab, var(--surface-2), transparent 25%);
+}
+.skeleton-16x9 { aspect-ratio: 16 / 9; }
+.skeleton-4x3  { aspect-ratio: 4 / 3; }
+.skeleton-1x1  { aspect-ratio: 1 / 1; }
+
+/* Pair with content-visibility to avoid rendering cost offscreen */
+.skeleton,
+.photo.skeleton,
+.tile.skeleton,
+.apod-media.skeleton {
+  content-visibility: auto;
+  contain-intrinsic-size: auto(240px); /* fallback size remembered after first render */
+}
+
+/* Disable shimmer for motion-sensitive users */
+@media (prefers-reduced-motion: reduce) {
+  .skeleton::after { animation: none; }
+}

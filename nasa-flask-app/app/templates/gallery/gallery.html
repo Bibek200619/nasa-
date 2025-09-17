@@ -1,0 +1,112 @@
+<!-- app/templates/gallery/gallery.html -->
+{% extends "base.html" %}
+{% block title %}APOD Gallery · NASA Flask App{% endblock %}
+
+{% block breadcrumb_items %}
+  <li aria-current="page">APOD Gallery</li>
+{% endblock %}
+
+{% block heading %}APOD Gallery (Range){% endblock %}
+
+{% block content %}
+  <section class="section surface">
+    <h1 class="sr-only" id="gallery-heading">APOD Gallery (Range)</h1>
+
+    <form method="get" aria-describedby="gallery-help">
+      <fieldset class="filters">
+        <legend id="date-legend">Date range</legend>
+
+        <div class="controls">
+          <div class="control">
+            <label for="start_date">Start</label>
+            <input
+              id="start_date"
+              type="date"
+              name="start_date"
+              value="{{ start_date or '' }}"
+              {% if end_date %}max="{{ end_date }}"{% endif %}>
+          </div>
+
+          <div class="control">
+            <label for="end_date">End</label>
+            <input
+              id="end_date"
+              type="date"
+              name="end_date"
+              value="{{ end_date or '' }}"
+              {% if start_date %}min="{{ start_date }}"{% endif %}>
+          </div>
+
+          <div class="control control-actions">
+            <button type="submit" class="button primary">Fetch</button>
+          </div>
+        </div>
+      </fieldset>
+      <p id="gallery-help">Choose start and end dates to load a gallery from APOD.</p>
+    </form>
+    {% if error %}
+      <div class="flash"><div class="error">{{ error }}</div></div>
+    {% endif %}
+
+    <div class="grid gallery" id="gallery" data-count="{{ items|length }}">
+      {% for item in items %}
+        <figure class="tile">
+          {% if item.media_type == "image" %}
+            <img
+              src="{{ item.url }}"
+              {% if item.width and item.height %}width="{{ item.width }}" height="{{ item.height }}"{% endif %}
+              alt="{{ item.title }} ({{ item.date }})"
+              loading="lazy"
+              decoding="async"
+              fetchpriority="low"
+              {% if item.srcset %}srcset="{{ item.srcset }}"{% endif %}
+              sizes="(max-width: 700px) 100vw, 320px">
+          {% elif item.media_type == "video" %}
+            <iframe
+              src="{{ item.url }}"
+              title="APOD video: {{ item.title }}"
+              loading="lazy"
+              width="640"
+              height="360"
+              allowfullscreen
+              referrerpolicy="no-referrer">
+            </iframe>
+          {% else %}
+            <a href="{{ item.url }}">{{ item.title }}</a>
+          {% endif %}
+          <figcaption>{{ item.date }} • {{ item.title }}</figcaption>
+        </figure>
+      {% else %}
+        <p>Provide a start and end date to load a gallery.</p>
+      {% endfor %}
+    </div>
+  </section>
+{% endblock %}
+<div class="gallery">
+  {% for item in items %}
+    <figure class="tile skeleton">
+      {% if item.media_type == "image" %}
+        <div class="skeleton-16x9"></div>
+        <img
+          src="{{ item.url }}"
+          alt="{{ item.title }} ({{ item.date }})"
+          loading="lazy"
+          decoding="async"
+          sizes="(max-width: 700px) 100vw, 320px"
+          onload="this.closest('.tile')?.classList.remove('skeleton')">
+      {% elif item.media_type == "video" %}
+        <div class="skeleton-16x9"></div>
+        <iframe
+          src="{{ item.url }}"
+          title="APOD video: {{ item.title }}"
+          allowfullscreen
+          referrerpolicy="no-referrer"
+          onload="this.closest('.tile')?.classList.remove('skeleton')">
+        </iframe>
+      {% endif %}
+      <figcaption>
+        <span class="skeleton-line thin skeleton"></span>
+      </figcaption>
+    </figure>
+  {% endfor %}
+</div>

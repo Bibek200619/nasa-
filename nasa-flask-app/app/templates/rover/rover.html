@@ -1,0 +1,107 @@
+<!-- app/templates/rover/rover.html -->
+{% extends "base.html" %}
+{% block title %}Mars Rover · NASA Flask App{% endblock %}
+
+{% block breadcrumb_items %}
+  <li aria-current="page">Mars Rover</li>
+{% endblock %}
+
+{% block heading %}Mars Rover Photos{% endblock %}
+
+{% block content %}
+  <section class="section surface">
+    <h1 class="sr-only" id="rover-heading">Mars Rover Photos</h1>
+
+    <form method="get" aria-labelledby="filters-legend">
+      <fieldset class="filters">
+        <legend id="filters-legend">Filters</legend>
+
+        <div class="controls">
+          <div class="control">
+            <label for="rover">Rover</label>
+            <select id="rover" name="rover">
+              {% for r in rovers %}
+                <option value="{{ r }}" {% if r == rover %}selected{% endif %}>{{ r|capitalize }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="control">
+            <label for="mode">Mode</label>
+            <select id="mode" name="mode">
+              <option value="latest" {% if mode=='latest' %}selected{% endif %}>Latest</option>
+              <option value="sol" {% if mode=='sol' %}selected{% endif %}>By Sol</option>
+              <option value="earth_date" {% if mode=='earth_date' %}selected{% endif %}>By Earth Date</option>
+            </select>
+          </div>
+
+          <div class="control">
+            <label for="sol">Sol</label>
+            <input id="sol" type="number" name="sol" min="0" value="{{ request.args.get('sol','') }}">
+          </div>
+
+          <div class="control">
+            <label for="earth_date">Earth Date</label>
+            <input id="earth_date" type="date" name="earth_date" value="{{ request.args.get('earth_date','') }}">
+          </div>
+
+          <div class="control">
+            <label for="camera">Camera</label>
+            <select id="camera" name="camera">
+              <option value="">Any</option>
+              {% for c in cameras %}
+                <option value="{{ c }}" {% if request.args.get('camera')==c %}selected{% endif %}>{{ c }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="control control-actions">
+            <button type="submit" class="button primary">Load</button>
+          </div>
+        </div>
+      </fieldset>
+    </form>
+
+    {% if error %}
+      <div class="flash"><div class="error">{{ error }}</div></div>
+    {% endif %}
+
+    <div class="grid photos" id="photos" data-count="{{ photos|length }}">
+      {% for p in photos %}
+        <figure class="photo">
+          <img
+            src="{{ p.img_src }}"
+            {% if p.width and p.height %}width="{{ p.width }}" height="{{ p.height }}"{% endif %}
+            alt="{{ p.rover.name }} — {{ p.camera.full_name }} (Sol {{ p.sol }}, {{ p.earth_date }})"
+            loading="lazy"
+            decoding="async"
+            fetchpriority="low"
+            sizes="(max-width: 700px) 100vw, 320px"
+            {% if p.srcset %}srcset="{{ p.srcset }}"{% endif %}>
+          <figcaption>
+            {{ p.rover.name }} • {{ p.camera.full_name }} • Sol {{ p.sol }} • {{ p.earth_date }}
+          </figcaption>
+        </figure>
+      {% else %}
+        <p>No photos found.</p>
+      {% endfor %}
+    </div>
+  </section>
+{% endblock %}
+<div class="grid photos">
+  {% for p in photos %}
+    <figure class="photo skeleton">
+      <div class="skeleton-4x3"></div>
+      <img
+        src="{{ p.img_src }}"
+        alt="{{ p.rover.name }} — {{ p.camera.full_name }} (Sol {{ p.sol }}, {{ p.earth_date }})"
+        loading="lazy"
+        decoding="async"
+        sizes="(max-width: 700px) 100vw, 320px"
+        onload="this.closest('.photo')?.classList.remove('skeleton')">
+      <figcaption>
+        <span class="skeleton-line thin skeleton"></span>
+      </figcaption>
+    </figure>
+  {% endfor %}
+</div>

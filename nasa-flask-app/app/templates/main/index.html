@@ -1,0 +1,61 @@
+<!-- app/templates/main/index.html -->
+{% extends "base.html" %}
+{% block title %}Home · NASA Flask App{% endblock %}
+
+{% block breadcrumb_items %}{% endblock %}
+{% block heading %}NASA Explorer{% endblock %}
+
+{% block content %}
+  <section class="section surface">
+    <h1 class="sr-only">NASA Explorer</h1>
+    <p>Browse the Astronomy Picture of the Day, Mars rover photos, and date-range galleries.</p>
+
+    <!-- Optional featured APOD preview (image only) -->
+    {% if apod and apod.media_type == 'image' %}
+      <figure class="apod-preview card">
+        <picture>
+          {% if apod.srcset %}
+            <!-- If server provides a responsive srcset -->
+            <img
+              src="{{ apod.url }}"
+              srcset="{{ apod.srcset }}"
+              sizes="(max-width: 700px) 100vw, 640px"
+              alt="{{ apod.title }}"
+              loading="lazy"
+              decoding="async">
+          {% else %}
+            <!-- Basic responsive image without srcset -->
+            <img
+              src="{{ apod.url }}"
+              alt="{{ apod.title }}"
+              loading="lazy"
+              decoding="async">
+          {% endif %}
+        </picture>
+        <figcaption>
+          {{ apod.title }}{% if apod.date %} • {{ apod.date }}{% endif %}
+        </figcaption>
+      </figure>
+    {% endif %}
+
+    <div class="cards features">
+      <article class="card">
+        <h2>APOD</h2>
+        <p>See today’s Astronomy Picture of the Day and learn about the universe one image at a time.</p>
+        <p><a class="button primary" href="{{ url_for('apod.apod_page') }}">View APOD</a></p>
+      </article>
+
+      <article class="card">
+        <h2>Mars Rover</h2>
+        <p>Explore Mars rover images by sol, Earth date, camera, or the latest photos.</p>
+        <p><a class="button" href="{{ url_for('rover.rover_page') }}">Explore Mars Rover</a></p>
+      </article>
+
+      <article class="card">
+        <h2>APOD Gallery</h2>
+        <p>Build a gallery across a date range with responsive, high-quality astrophotography.</p>
+        <p><a class="button" href="{{ url_for('gallery.gallery_page') }}">APOD Gallery</a></p>
+      </article>
+    </div>
+  </section>
+{% endblock %}

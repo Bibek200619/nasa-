@@ -1,0 +1,119 @@
+<!-- app/templates/apod/apod.html -->
+{% extends "base.html" %}
+{% block title %}APOD · NASA Flask App{% endblock %}
+
+{% block breadcrumb_items %}
+  <li aria-current="page">APOD</li>
+{% endblock %}
+
+{% block heading %}APOD{% endblock %}
+
+{% block content %}
+  <section class="section surface">
+    <h1 class="sr-only" id="apod-heading">APOD</h1>
+
+    <form method="get" aria-describedby="apod-help">
+      <fieldset class="filters">
+        <legend>Filters</legend>
+
+        <div class="controls">
+          <div class="control">
+            <label for="apod-date">Date</label>
+            <input
+              id="apod-date"
+              type="date"
+              name="date"
+              value="{{ request.args.get('date','') }}">
+          </div>
+
+          <div class="control">
+            <label for="apod-hd">Resolution</label>
+            <select id="apod-hd" name="hd">
+              <option value="">Auto</option>
+              <option value="true" {% if request.args.get('hd') == 'true' %}selected{% endif %}>HD</option>
+              <option value="false" {% if request.args.get('hd') == 'false' %}selected{% endif %}>Standard</option>
+            </select>
+          </div>
+
+          <div class="control control-actions">
+            <button type="submit" class="button primary">Load</button>
+          </div>
+        </div>
+      </fieldset>
+      <p id="apod-help">Choose a date or toggle HD to request higher resolution when available.</p>
+    </form>
+
+    {% if error %}
+      <div class="flash"><div class="error">{{ error }}</div></div>
+    {% endif %}
+
+    {% if apod %}
+      <article class="apod-article surface">
+        <header>
+          <h2>{{ apod.title }}</h2>
+          <p><time datetime="{{ apod.date }}">{{ apod.date }}</time></p>
+        </header>
+
+        {% if apod.media_type == "image" %}
+          {% set hd_arg = request.args.get('hd') %}
+          {% if hd_arg == 'false' %}
+            {% set best = apod.url %}
+          {% elif hd_arg == 'true' and apod.hdurl %}
+            {% set best = apod.hdurl %}
+          {% else %}
+            {% set best = apod.hdurl or apod.url %}
+          {% endif %}
+
+          <figure class="apod-media apod-image">
+            <img
+              src="{{ best }}"
+              {% if apod.width and apod.height %}width="{{ apod.width }}" height="{{ apod.height }}"{% endif %}
+              alt="{{ apod.title }}"
+              fetchpriority="high"
+              loading="eager"
+              decoding="async"
+              sizes="(max-width: 700px) 100vw, 960px"
+              {% if apod.srcset %}srcset="{{ apod.srcset }}"{% endif %}>
+            <figcaption>{{ apod.title }}{% if apod.date %} • {{ apod.date }}{% endif %}</figcaption>
+          </figure>
+
+        {% elif apod.media_type == "video" %}
+          <figure class="apod-media apod-video">
+            <iframe
+              src="{{ apod.url }}"
+              title="APOD video: {{ apod.title }}"
+              width="960"
+              height="540"
+              fetchpriority="high"
+              allowfullscreen
+              referrerpolicy="no-referrer">
+            </iframe>
+            <figcaption>{{ apod.title }}{% if apod.date %} • {{ apod.date }}{% endif %}</figcaption>
+          </figure>
+        {% endif %}
+
+        <p class="apod-explanation">{{ apod.explanation }}</p>
+      </article>
+    {% endif %}
+  </section>
+{% endblock %}
+<article class="apod-article">
+  <figure class="apod-media apod-image skeleton">
+    <img
+      src="{{ apod.hdurl or apod.url }}"
+      alt="{{ apod.title }}"
+      loading="lazy"
+      decoding="async"
+      sizes="(max-width: 700px) 100vw, 700px"
+      onload="this.closest('.skeleton')?.classList.remove('skeleton')">
+    <figcaption class="sr-only">Loading…</figcaption>
+  </figure>
+
+  <div class="apod-explanation">
+    <div class="skeleton-line wide skeleton"></div>
+    <div class="skeleton-gap"></div>
+    <div class="skeleton-line skeleton"></div>
+    <div class="skeleton-gap"></div>
+    <div class="skeleton-line thin skeleton"></div>
+  </div>
+</article>
